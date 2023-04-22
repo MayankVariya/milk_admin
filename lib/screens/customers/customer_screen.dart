@@ -77,94 +77,139 @@ class _CustomerScreenState extends State<CustomerScreen> {
     String cAddress = customerAddressController.text.trim();
 
     if (formKey.currentState!.validate()) {
-      await addCustomer(cName, cMobileNumber, cEmail, cAddress, cid);
+      try {
+        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+            .collection("users")
+            .where("cContactNumber", isEqualTo: cMobileNumber)
+            .get();
 
-      // ignore: use_build_context_synchronously
-      Navigator.of(context).pop();
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Customer Successfully Created"),
-      ));
-      showDialog(
-        context: context,
-        builder: (context) => Dialog(
-          insetPadding:
-              EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth! * 0.06),
-          shape:
+        if (querySnapshot.docs.isNotEmpty) {
+          // ignore: use_build_context_synchronously
+          Navigator.of(context).pop();
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(7),
-                decoration: BoxDecoration(
-                    color: indigo700,
-                    borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(15),
-                        topRight: Radius.circular(15))),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "Share the userName and password\n with the Customer",
-                      style:
+              title: const Text("Error"),
+              content: const Text("Customer Already exists"),
+              actions: [
+                BtnText(onPressed: () => Navigator.of(context).pop(), text: "OK")
+              ],
+            ),
+          );
+        } else {
+          CustomerModel customer = CustomerModel(
+              id: cMobileNumber,
+              pass: cMobileNumber,
+              cid: cid,
+              cName: cName,
+              cProfilePic: "",
+              cContactNumber: cMobileNumber,
+              cEmail: cEmail,
+              myproduct: [],
+              delivered: false,
+              useNotDeleted: false,
+              verified: false,
+              cAddress: cAddress);
+          final customerRef = customerCollection.doc(cid);
+
+          ///add profile details
+          await customerRef.set(customer.toMap());
+
+          // ignore: use_build_context_synchronously
+          Navigator.of(context).pop();
+          // ignore: use_build_context_synchronously
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text("Customer Successfully Created"),
+          ));
+          showDialog(
+            context: context,
+            builder: (context) => Dialog(
+              insetPadding:
+              EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth! * 0.06),
+              shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(7),
+                    decoration: BoxDecoration(
+                        color: indigo700,
+                        borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(15),
+                            topRight: Radius.circular(15))),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Share the userName and password\n with the Customer",
+                          style:
                           TextStyle(fontWeight: FontWeight.bold, color: white),
+                        ),
+                        BtnIcon(
+                            iconColor: white,
+                            onPressed: () => Navigator.of(context).pop(),
+                            icon: Icons.close)
+                      ],
                     ),
-                    BtnIcon(
-                        iconColor: white,
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: Icons.close)
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: SizeConfig.screenHeight! * 0.002,
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: SizeConfig.screenWidth! * 0.05,
-                    vertical: SizeConfig.screenHeight! * 0.02),
-                child: Text.rich(TextSpan(children: [
-                  TextSpan(
-                      text: widget.adminName,
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
-                  const TextSpan(
-                    text: " has created your account in ",
                   ),
-                  const TextSpan(
-                      text: "$appName.",
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  const TextSpan(
-                    text: "The username : ",
+                  SizedBox(
+                    height: SizeConfig.screenHeight! * 0.002,
                   ),
-                  TextSpan(
-                      text: cMobileNumber,
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
-                  const TextSpan(
-                    text: " and password : ",
-                  ),
-                  TextSpan(
-                      text: cMobileNumber,
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
-                  const TextSpan(
-                    text:
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: SizeConfig.screenWidth! * 0.05,
+                        vertical: SizeConfig.screenHeight! * 0.02),
+                    child: Text.rich(TextSpan(children: [
+                      TextSpan(
+                          text: widget.adminName,
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
+                      const TextSpan(
+                        text: " has created your account in ",
+                      ),
+                      const TextSpan(
+                          text: "$appName.",
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      const TextSpan(
+                        text: "The username : ",
+                      ),
+                      TextSpan(
+                          text: cMobileNumber,
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
+                      const TextSpan(
+                        text: " and password : ",
+                      ),
+                      TextSpan(
+                          text: cMobileNumber,
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
+                      const TextSpan(
+                        text:
                         " for logging in is this.Download the app today to track your milk.",
+                      ),
+                    ])),
                   ),
-                ])),
+                  SizedBox(
+                    height: SizeConfig.screenHeight! * 0.002,
+                  ),
+                  BtnIcon(
+                      onPressed: () {
+                        Share.share(
+
+                            "${widget.adminName} has created your account in $appName.\nThe username : $cMobileNumber \npassword : $cMobileNumber \nfor logging in is this.Download the app today to track your milk: \n $appUrl");
+                      },
+                      icon: Icons.share)
+                ],
               ),
-              SizedBox(
-                height: SizeConfig.screenHeight! * 0.002,
-              ),
-              BtnIcon(
-                  onPressed: () {
-                    Share.share(
-                        "${widget.adminName} has created your account in $appName.\nThe username : $cMobileNumber \npassword : $cMobileNumber \nfor logging in is this.Download the app today to track your milk.");
-                  },
-                  icon: Icons.share)
-            ],
-          ),
-        ),
-      );
+            ),
+          );
+        }
+      } catch (e) {
+        showErrorAlertDialog(context, "Error", "$e");
+      }
+
+
 
       customerNameController.clear();
       customerMobileNumberController.clear();

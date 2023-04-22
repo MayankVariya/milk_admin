@@ -196,20 +196,3 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// showTable(
-//                   headingFontSize: 13,
-//                   dataFontSize: 15,
-//                   context,
-//                   type.map((type) {
-//                     return DataColumn(
-//                         label: Center(
-//                       child: Text(
-//                         type,
-//                       ),
-//                     ));
-//                   }).toList(),
-//                   milk.map((milk) {
-//                     return DataCell(Center(
-//                       child: Text(milk),
-//                     ));
-//                   }).toList()),
