@@ -28,7 +28,7 @@ class _HomePageBodyWidgetState extends State<HomePageBodyWidget> {
 
   bool isTimeInRange() {
     var currentTime = DateTime.now().hour;
-    if (currentTime > 12) {
+    if (currentTime > 17) {
       return false;
     } else {
       return true;
